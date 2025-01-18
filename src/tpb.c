@@ -183,8 +183,7 @@ int get_next_rolls_value(LinkedList frame_list[], int frame_index, int n)
 }
 
 /* ---------------------------------------------------------------------
-   Aquí va el resto de tu bowling_score_parser
-   y la print_scoreboard, etc.
+   FIn:Funciones auxiliares 
    --------------------------------------------------------------------- */
 
 
@@ -278,6 +277,24 @@ bool tokenization(char c, Lex *l)
     return true;
 }
 
+
+/* -------------------------------------------------------- */
+/*  Sección Principal: bowling_score_parser                  */
+/* -------------------------------------------------------- */
+
+/*
+ * bowling_score_parser:
+ *   - parsea la cadena de caracteres y devuelve una LinkedList de Frames (10 frames),
+ *     o NULL en caso de error.
+ *   - Utiliza `err_position` para indicar la posición 0-based del error.
+ *
+ * Sigue la estructura:
+ *   1. Initialization
+ *   2. Lexer
+ *   3. Parser
+ *   4. Reducer
+ *   5. Epilogue
+ */
 
 
 
@@ -586,6 +603,11 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
     /* Devolver el scoreboard si todo fue bien */
     return scoreboard;
 }
+
+
+/* -------------------------------------------------------- */
+/*  Fin Sección Principal: bowling_score_parser                  */
+/* -------------------------------------------------------- */
 
 
 
