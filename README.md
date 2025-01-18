@@ -1,10 +1,10 @@
 # Bowling Score Parser and Scoreboard
 
-## Description
+### Description
 
 A C program to calculate and display bowling scores using custom data structures like linked lists and queues.
 
-## Goal Project
+### Goal Project
 
 1. Implement two related tasks as outlined in the provided instructions.
 2. Maintain a version history during development to capture different save points.
