@@ -619,9 +619,59 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
 
 
 
-void print_scoreboard(LinkedList*scoreboard)
+void print_scoreboard(LinkedList *scoreboard)
 {
- 
-}
+    /* Declaración de variables al inicio (C90) */
+    Node *current;
+    char game_str[1000]; /*Asegúrate de que este buffer sea suficientemente grande*/ 
+    int pos;
+    Frame *frame;
+    int first;
 
+    /* Verificar si el scoreboard está vacío */
+    if (scoreboard == NULL || scoreboard->head == NULL) {
+        printf("\n");
+        return;
+    }
+
+    /* Inicializar variables */
+    current = scoreboard->head;
+    pos = 0;
+    first = 1;
+
+    /* Reconstruir la cadena del juego a partir de los frames */
+    while (current != NULL) {
+        frame = (Frame *)current->data;
+        if (frame != NULL) {
+            int i;
+            for (i = 0; i < frame->n_rolls; i++) {
+                game_str[pos++] = frame->rolls[i];
+            }
+        }
+        current = current->next;
+    }
+    game_str[pos] = '\0'; /*Terminar la cadena*/
+
+    /* Imprimir la cadena del juego seguida de dos puntos y un espacio */
+    printf("%s: ", game_str);
+
+    /* Reiniciar el puntero para recorrer nuevamente la lista y imprimir las puntuaciones */
+    current = scoreboard->head;
+
+    while (current != NULL) {
+        frame = (Frame *)current->data;
+        if (frame != NULL) {
+            if (first) {
+                printf("%d", frame->score);
+                first = 0;
+            } else {
+                printf(" %d", frame->score);
+            }
+        }
+        current = current->next;
+    }
+
+    /* Finalizar con un salto de línea */
+    printf("\n");
+}
 
