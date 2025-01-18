@@ -30,7 +30,7 @@ scoreboard/
 │   ├── test_input.txt                # Input data for testing
 │   ├── expected_output.txt           # Expected outputs for validation
 ├── docs /                            # Instructions and resources
-│   ├── c_program_instructions.pdf    # Unit tests for the project
+│   ├── c_program_instructions.pdf    # Instrusctions of the C project
 ├── Makefile                          # Build automation file
 ├── README.md                         # Project documentation
 ├── .gitignore                        # Ignore patterns for version control
