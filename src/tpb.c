@@ -39,7 +39,6 @@ typedef struct
 /* --------------------------------------------------------------
    NUEVO: Aquí colocas las 3 funciones helper 
    validate_frame, validate_last_frame, get_next_rolls_value
-   para evitar tener que crear helper.c
    -------------------------------------------------------------- */
 
 /* Función para validar un frame 1..9 */
