@@ -152,14 +152,14 @@ bool validate_last_frame(LinkedList *fr, int *err_position)
 
 /* Función para obtener la suma de las próximas 'n' tiradas 
    después del frame 'frame_index' => para bonificaciones. */
-int get_next_rolls_value(LinkedList frame_list[], int frame_index, int n)
+int get_next_rolls_value(LinkedList *frame_list[], int frame_index, int n)
 {
     int sum = 0;
     int collected = 0;
     int f;
 
     for (f = frame_index + 1; f < FRAME_NUMBER && collected < n; f++) {
-        Node *node = frame_list[f].head;
+        Node *node = frame_list[f]->head;
         while (node != NULL && collected < n) {
             Lex *roll_lex = (Lex *)node->data;
 
@@ -301,10 +301,11 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
 {
     /* -------------------- SECTION 1: INITIALISATION -------------------- */
     Queue *tokens;
-    LinkedList frame_list[FRAME_NUMBER];
+    LinkedList *frame_list[FRAME_NUMBER];      /* Declara frame_list como un arreglo de punteros */
     LinkedList *scoreboard;
     size_t length;
     int i;               /* Para bucles en C90 */
+    int k;  /* Declarar fuera del bucle */
     int current_frame;
     int rolls_in_frame;
     int cumulative_score;
@@ -327,12 +328,20 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
     }
 
     /* Inicializar el array de frame_list */
+    
     for (i = 0; i < FRAME_NUMBER; i++) {
-        LinkedList *flTemp;
-        flTemp = initialise_linked_list();  /* crea lista vacía */
-        frame_list[i] = *flTemp;            /* asignación por valor */
-        free(flTemp);                       /* libera la estructura temporal, 
-                                               sin destruir nodos (no hay nodos) */
+    frame_list[i] = initialise_linked_list(); /* Asigna el puntero directamente */
+    if (frame_list[i] == NULL) {              /* Verifica si la inicialización falló */
+        if (err_position != NULL) {
+            *err_position = 0;
+        }
+        /* Liberar las listas ya inicializadas */
+        for (k = 0; k < i; k++) {             /* Usar la variable declarada */
+            free_linked_list(frame_list[k]);
+        }
+        free_queue(tokens);
+        return NULL;
+        }
     }
 
     /* Inicializar el scoreboard final (lista enlazada de frames) */
@@ -379,7 +388,7 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
         }
 
         /* Agregar el token al frame actual */
-        append_linked_list(&frame_list[current_frame], tk);
+        append_linked_list(frame_list[current_frame], tk);
 
         /* Lógica para frames 1..9 */
         if (current_frame < 9) {
@@ -411,7 +420,7 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
                 int strike_count = 0;
                 int spare_count = 0;
 
-                n = frame_list[current_frame].head;
+                n = frame_list[current_frame]->head;
                 while (n != NULL) {
                     Lex *roll_lex = (Lex *)n->data;
                     if (roll_lex->token == TOKEN_STRIKE) {
@@ -446,7 +455,7 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
         Lex *rolls_in_this_frame[4];
 
         /* Si no hay tokens en este frame => asumimos juego incompleto y salimos */
-        if (frame_list[i].head == NULL) {
+        if (frame_list[i]->head == NULL) {
             break;
         }
 
@@ -460,7 +469,7 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
             {
                 int k;
                 for (k = 0; k < FRAME_NUMBER; k++) {
-                    free_linked_list(&frame_list[k]);
+                    free_linked_list(frame_list[k]);
                 }
             }
             free_scoreboard(scoreboard);
@@ -475,13 +484,13 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
         /* Validar la estructura del frame */
         if (i < 9) {
             /* frames 1..9 => validate_frame */
-            if (!validate_frame(&frame_list[i], err_position)) {
+            if (!validate_frame(frame_list[i], err_position)) {
                 /* error => limpiar y salir */
                 free(newframe);
                 {
                     int k;
                     for (k = 0; k < FRAME_NUMBER; k++) {
-                        free_linked_list(&frame_list[k]);
+                        free_linked_list(frame_list[k]);
                     }
                 }
                 free_scoreboard(scoreboard);
@@ -490,12 +499,12 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
             }
         } else {
             /* frame 10 => validate_last_frame */
-            if (!validate_last_frame(&frame_list[i], err_position)) {
+            if (!validate_last_frame(frame_list[i], err_position)) {
                 free(newframe);
                 {
                     int k;
                     for (k = 0; k < FRAME_NUMBER; k++) {
-                        free_linked_list(&frame_list[k]);
+                        free_linked_list(frame_list[k]);
                     }
                 }
                 free_scoreboard(scoreboard);
@@ -505,7 +514,7 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
         }
 
         /* Recolectar los tokens (Lex *) del frame */
-        nd = frame_list[i].head;
+        nd = frame_list[i]->head;
         roll_count = 0;
         while (nd != NULL && roll_count < 4) {
             rolls_in_this_frame[roll_count] = (Lex *)nd->data;
@@ -587,13 +596,13 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
     /* Liberar la memoria reservada en frame_list (Lex*) */
     for (i = 0; i < FRAME_NUMBER; i++) {
         Node *nd2;
-        nd2 = frame_list[i].head;
+        nd2 = frame_list[i]->head;
         while (nd2 != NULL) {
             /* Cada nodo->data era un Lex* devuelto por pop_queue (malloc) */
             free(nd2->data);
             nd2 = nd2->next;
         }
-        free_linked_list(&frame_list[i]);
+        free_linked_list(frame_list[i]);
     }
 
     /* Liberar la cola */
