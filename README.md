@@ -20,18 +20,17 @@ scoreboard/
 │   ├── tpb.c                         # Bowling score parser and scoreboard logic
 │   ├── score_calculator.c            # Score calculation and validation
 │   ├── helpers.c                     # Utility/helper functions
-├── include/                          # Header files
 │   ├── linked_list.h                 # Header file for linked list
 │   ├── queue.h                       # Header file for queue
 │   ├── tpb.h                         # Header file for tpb.c
 │   ├── helpers.h                     # Header file for helpers
+│   ├── Makefile                      # Build automation file
 ├── tests/                            # Test cases and resources
 │   ├── test_cases.c                  # Unit tests for the project
 │   ├── test_input.txt                # Input data for testing
 │   ├── expected_output.txt           # Expected outputs for validation
 ├── docs /                            # Instructions and resources
 │   ├── c_program_instructions.pdf    # Instrusctions of the C project
-├── Makefile                          # Build automation file
 ├── README.md                         # Project documentation
 ├── .gitignore                        # Ignore patterns for version control
 
