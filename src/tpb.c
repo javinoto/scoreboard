@@ -463,10 +463,11 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
             rolls_in_frame++;
             if (rolls_in_frame == 3) {
                 /* Alcanzamos 3 lanzamientos => cerramos el frame 10 */
+                current_frame++;  
                 break;
             } else {
                 /* Podríamos cerrar antes si los 2 primeros rolls son open 
-                   (sin strike/spare). Recorremos el frame actual */
+                (sin strike/spare). Recorremos el frame actual */
                 Node *n;
                 int roll_count = 0;
                 int strike_count = 0;
@@ -488,12 +489,46 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
                 /* Si ya llevamos 2 tiradas, pero ni strike ni spare => frame cerrado */
                 if (roll_count == 2) {
                     if (strike_count == 0 && spare_count == 0) {
+                        current_frame++;  
                         break;
                     }
                 }
             }
         }
     }
+
+    /* -------------------- VERIFICACIÓN DE TOKENS SOBRANTES -------------------- */
+
+    /* -- Verificar si completaste 10 frames y aún quedan tokens (sobran tiradas) -- */
+    if (current_frame == FRAME_NUMBER && tokens->head != NULL) {
+        Lex *leftover_lex = (Lex *)tokens->head->data;  /* primer token sobrante */
+        if (err_position != NULL) {
+            *err_position = leftover_lex->pos;  /* índice 0-based del char sobrante */
+        }
+        /* Limpieza */
+        for (k = 0; k < FRAME_NUMBER; k++) {
+            free_linked_list(frame_list[k]);
+        }
+        free_scoreboard(scoreboard);
+        free_queue(tokens);
+        return NULL;
+    }
+
+    /* -- Verificar si no completaste 10 frames y ya no hay tokens (faltan tiradas) -- */
+    if (current_frame < FRAME_NUMBER && tokens->head == NULL) {
+        /* Marcar el error al final de la cadena */
+        if (err_position != NULL) {
+            *err_position = (int)strlen(game_characters);
+        }
+        /* Limpieza */
+        for (k = 0; k < FRAME_NUMBER; k++) {
+            free_linked_list(frame_list[k]);
+        }
+        free_scoreboard(scoreboard);
+        free_queue(tokens);
+        return NULL;
+    }
+
 
     /* -------------------- SECTION 4: REDUCER -------------------- */
     cumulative_score = 0;
