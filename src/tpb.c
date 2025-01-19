@@ -150,36 +150,104 @@ bool validate_last_frame(LinkedList *fr, int *err_position)
     return true;
 }
 
+
+
 /* Función para obtener la suma de las próximas 'n' tiradas 
    después del frame 'frame_index' => para bonificaciones. */
 int get_next_rolls_value(LinkedList *frame_list[], int frame_index, int n)
 {
-    int sum = 0;
-    int collected = 0;
-    int f;
+    /* Declaraciones al inicio (C90) */
+    int i, f;               /* para bucles */
+    Node *cur;              /* para recorrer cada frame */
+    Lex *roll_lex;          /* para apuntar a cada Lex */
+    Lex *rolls_array[24];   /* hasta 21 tiradas + margen. 24 para estar seguros */
+    int rolls_count = 0;    /* total de tiradas en rolls_array */
+    int last_of_frame_index;/* posición del último roll de la frame 'frame_index' en rolls_array */
+    int sum;                /* resultado a devolver */
+    int collected;          /* cuántos lanzamientos sumamos */
+    int arr_idx;            /* índice en rolls_array */
 
-    for (f = frame_index + 1; f < FRAME_NUMBER && collected < n; f++) {
-        Node *node = frame_list[f]->head;
-        while (node != NULL && collected < n) {
-            Lex *roll_lex = (Lex *)node->data;
+    /* 1) Construir un arreglo lineal con todas las tiradas del juego */
+    rolls_count = 0;
+    memset(rolls_array, 0, sizeof(rolls_array));
 
-            /* Sumar valor 10 si strike/spare, o número si literal, o 0 si gutter/fault */
-            if (roll_lex->token == TOKEN_STRIKE) {
-                sum += 10;
-            }
-            else if (roll_lex->token == TOKEN_SPARE) {
-                sum += 10;
-            }
-            else if (roll_lex->token == TOKEN_LITERAL) {
-                sum += (roll_lex->character - '0');
-            }
-            /* GUTTER o FAULT => 0 */
-            collected++;
-            node = node->next;
+    for (f = 0; f < FRAME_NUMBER; f++) {
+        cur = frame_list[f]->head;
+        while (cur != NULL && rolls_count < 24) {
+            roll_lex = (Lex *)cur->data;
+            rolls_array[rolls_count++] = roll_lex;
+            cur = cur->next;
         }
     }
+
+    /* 2) Localizar la última tirada de la frame 'frame_index' */
+    /* 
+       Para ello, recorremos la frame frame_index de punta a punta, 
+       y guardamos su último Lex* en 'last_of_frame_index' 
+       localizamos la posición en rolls_array que coincide con 
+       ese último Lex*.
+    */
+    /* primero, buscar el último nodo de la frame 'frame_index' */
+    cur = frame_list[frame_index]->head;
+    if (!cur) {
+        /* si la frame está vacía, no hay bonificación que buscar */
+        return 0;
+    }
+
+    /* avanzar hasta el final de la frame frame_index */
+    while (cur->next != NULL) {
+        cur = cur->next;
+    }
+    /* 'cur' apunta ahora a la última tirada de la frame 'frame_index' */
+
+    /* buscar 'cur->data' en el arreglo lineal */
+    last_of_frame_index = -1;
+    for (i = 0; i < rolls_count; i++) {
+        if (rolls_array[i] == (Lex *)cur->data) {
+            last_of_frame_index = i;
+            break;
+        }
+    }
+
+    if (last_of_frame_index == -1) {
+        /* no se encontró => no hay bonificación */
+        return 0;
+    }
+
+    /* 3) Sumar los n lanzamientos siguientes en el arreglo lineal */
+    sum = 0;
+    collected = 0;
+
+    /* empezar en last_of_frame_index + 1 */
+    arr_idx = last_of_frame_index + 1;
+    while (arr_idx < rolls_count && collected < n) {
+        roll_lex = rolls_array[arr_idx];
+
+        if (roll_lex->token == TOKEN_STRIKE) {
+            sum += 10;
+        }
+        else if (roll_lex->token == TOKEN_SPARE) {
+            /*
+              Spare => su valor global es 10, 
+              pero en un "roll a roll" la 2ª tirada se complementa 
+              a 10 con la 1ª. 
+              Para un bonus, puede ser más fácil considerarlo como 10.
+            */
+            sum += 10;
+        }
+        else if (roll_lex->token == TOKEN_LITERAL) {
+            sum += (roll_lex->character - '0');
+        }
+        /* GUTTER/Fault => 0 */
+
+        collected++;
+        arr_idx++;
+    }
+
     return sum;
 }
+
+
 
 /* ---------------------------------------------------------------------
    FIn:Funciones auxiliares 
