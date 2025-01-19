@@ -76,7 +76,8 @@ To run the project code, consider using VScode with the following extensions:
  
  - **brach for task1:** feature/task1
  - **brach for task2:** main
-    Before to change of brach need to execute `make clean` 
+    
+Before to change of brach need to execute `make clean` 
 
 ```bash
 # example for execution code for Task 1
