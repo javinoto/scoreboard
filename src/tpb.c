@@ -514,20 +514,7 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
         return NULL;
     }
 
-    /* -- Verificar si no completaste 10 frames y ya no hay tokens (faltan tiradas) -- */
-    if (current_frame < FRAME_NUMBER && tokens->head == NULL) {
-        /* Marcar el error al final de la cadena */
-        if (err_position != NULL) {
-            *err_position = (int)strlen(game_characters);
-        }
-        /* Limpieza */
-        for (k = 0; k < FRAME_NUMBER; k++) {
-            free_linked_list(frame_list[k]);
-        }
-        free_scoreboard(scoreboard);
-        free_queue(tokens);
-        return NULL;
-    }
+
 
 
     /* -------------------- SECTION 4: REDUCER -------------------- */
