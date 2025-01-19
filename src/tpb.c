@@ -693,59 +693,66 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
 
 
 
-void print_scoreboard(LinkedList *scoreboard)
-{
-    /* Declaración de variables al inicio (C90) */
+void print_scoreboard(LinkedList *scoreboard) {
     Node *current;
-    char game_str[1000]; /*Asegúrate de que este buffer sea suficientemente grande*/ 
-    int pos;
     Frame *frame;
-    int first;
+    int frame_count;
+    int scores[10];
+    char rolls[10][6]; /* Máximo 5 caracteres por frame */
+    int i;
 
-    /* Verificar si el scoreboard está vacío */
-    if (scoreboard == NULL || scoreboard->head == NULL) {
-        printf("\n");
-        return;
+    /* Inicializar buffers */
+    for (i = 0; i < 10; i++) {
+        memset(rolls[i], ' ', sizeof(rolls[i]));
+        rolls[i][0] = '\0'; /* Asegurarse de que cada cadena termine con '\\0' */
     }
+    memset(scores, 0, sizeof(scores));
 
-    /* Inicializar variables */
+    frame_count = 0;
+
+     /* Recorrer el scoreboard */
     current = scoreboard->head;
-    pos = 0;
-    first = 1;
-
-    /* Reconstruir la cadena del juego a partir de los frames */
-    while (current != NULL) {
+    while (current != NULL && frame_count < 10) {
         frame = (Frame *)current->data;
         if (frame != NULL) {
-            int i;
-            for (i = 0; i < frame->n_rolls; i++) {
-                game_str[pos++] = frame->rolls[i];
+            /* Guardar rolls */
+            for (i = 0; i < frame->n_rolls && i < 3; i++) {
+                rolls[frame_count][i * 2] = frame->rolls[i];
+                if (i < frame->n_rolls - 1) {
+                    rolls[frame_count][i * 2 + 1] = ' '; /* Agregar espacio entre rolls */
+                }
             }
+            rolls[frame_count][frame->n_rolls * 2 - 1] = '\0'; /* Finalizar cadena correctamente */
+            /* Guardar el acumulado */
+            scores[frame_count] = frame->score;
         }
-        current = current->next;
-    }
-    game_str[pos] = '\0'; /*Terminar la cadena*/
-
-    /* Imprimir la cadena del juego seguida de dos puntos y un espacio */
-    printf("%s: ", game_str);
-
-    /* Reiniciar el puntero para recorrer nuevamente la lista y imprimir las puntuaciones */
-    current = scoreboard->head;
-
-    while (current != NULL) {
-        frame = (Frame *)current->data;
-        if (frame != NULL) {
-            if (first) {
-                printf("%d", frame->score);
-                first = 0;
-            } else {
-                printf(" %d", frame->score);
-            }
-        }
+        frame_count++;
         current = current->next;
     }
 
-    /* Finalizar con un salto de línea */
-    printf("\n");
+    /* Construcción de la tabla */
+    printf("+-----+-----+-----+-----+-----+-----+-----+-----+-----+-------+\n");
+    printf("|");
+
+    for (i = 0; i < 9; i++) {
+        printf(" %-3s |", rolls[i]); /* Espacio reservado para 3 caracteres */
+    }
+    printf(" %-5s |\n", rolls[9]); /* Último frame tiene más espacio */
+    printf("|");
+
+    for (i = 0; i < 9; i++) {
+        if (scores[i] == 0 && strlen(rolls[i]) == 0) {
+            /* Casillas vacías para juegos incompletos */
+            printf("     |");
+        } else {
+            printf(" %3d |", scores[i]);
+        }
+    }
+    if (scores[9] == 0 && strlen(rolls[9]) == 0) {
+        printf("       |\n"); /* Última casilla vacía */
+    } else {
+        printf(" %5d |\n", scores[9]);
+    }
+
+    printf("+-----+-----+-----+-----+-----+-----+-----+-----+-----+-------+\n");
 }
-
