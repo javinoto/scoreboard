@@ -71,6 +71,20 @@ To run the project code, consider using VScode with the following extensions:
    ```
 
 ### Test Execution
+
+💡 To execute the code according the instructions need to choose the correct branch
+ 
+ - **brach for task1:** feature/task1
+ - **brach for task2:** main
+    Before to change of brach need to execute `make clean` 
+
+```bash
+# example for execution code for Task 1
+make clean
+git checkout feature/task1
+```
+
+
 For the task1:
  
  1. Compile task1:
@@ -130,6 +144,23 @@ For task2:
     ```bash
     ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)    
     ```
+
+Another executions:
+
+1. Another examples of instructions doc:
+    ```bash
+    # input
+    ./task1 547-9/5/8-X5/XX5/X
+     ```
+
+     ```bash
+    #output
+    +-----------------------------------------+
+    |5 4|7 -|9 /|5 /|8 -|X  |5 /|X  |X  |5 / X|
+    |  9| 16| 31| 49| 57| 77| 97|122|142|  162|
+    +-----------------------------------------+
+
+     ```
 
 
 
