@@ -42,11 +42,12 @@ Install the following tools in a Unix enviroment:
 
 - `build-essential` (includes `gcc`, `g++`, and `make` for compiling and building C/C++ programs))
 - `gdb` (GNU Debugger)
+- `valgrind`(Memory analysis)
 
 ### Installation
 
 ```bash
-sudo apt update && sudo apt install build-essential gdb
+sudo apt update && sudo apt install build-essential gdb valgrind
 ```
 
 ## Suggestion
