@@ -693,66 +693,97 @@ LinkedList * bowling_score_parser(const char *game_characters, int *err_position
 
 
 
+/* Function to print the scoreboard */
 void print_scoreboard(LinkedList *scoreboard) {
     Node *current;
     Frame *frame;
     int frame_count;
     int scores[10];
-    char rolls[10][6]; /* Máximo 5 caracteres por frame */
+    char rolls[10][6]; 
     int i;
 
-    /* Inicializar buffers */
+    /* Initialize buffers */
     for (i = 0; i < 10; i++) {
         memset(rolls[i], ' ', sizeof(rolls[i]));
-        rolls[i][0] = '\0'; /* Asegurarse de que cada cadena termine con '\\0' */
+        rolls[i][0] = '\0'; 
     }
     memset(scores, 0, sizeof(scores));
 
     frame_count = 0;
 
-     /* Recorrer el scoreboard */
+    /* Traverse the scoreboard */
     current = scoreboard->head;
     while (current != NULL && frame_count < 10) {
         frame = (Frame *)current->data;
         if (frame != NULL) {
-            /* Guardar rolls */
-            for (i = 0; i < frame->n_rolls && i < 3; i++) {
-                rolls[frame_count][i * 2] = frame->rolls[i];
-                if (i < frame->n_rolls - 1) {
-                    rolls[frame_count][i * 2 + 1] = ' '; /* Agregar espacio entre rolls */
+            /* Store rolls */
+            if (frame_count < 9) { /* Frames 1 to 9 */
+                for (i = 0; i < frame->n_rolls && i < 2; i++) {
+                    /* Ensure characters are uppercase if necessary */
+                    char roll_char = frame->rolls[i];
+                    if (roll_char == 'x') {
+                        roll_char = 'X';
+                    }
+                    rolls[frame_count][i * 2] = roll_char;
+                    if (i < frame->n_rolls - 1) {
+                        rolls[frame_count][i * 2 + 1] = ' '; /* Add space between rolls */
+                    }
                 }
+                /* Properly terminate the string without additional space */
+                rolls[frame_count][frame->n_rolls * 2 - 1] = '\0';
+            } else { /* Frame 10 */
+                for (i = 0; i < frame->n_rolls && i < 3; i++) {
+                    /* Ensure characters are uppercase if necessary */
+                    char roll_char = frame->rolls[i];
+                    if (roll_char == 'x') {
+                        roll_char = 'X';
+                    }
+                    rolls[frame_count][i * 2] = roll_char;
+                    if (i < frame->n_rolls - 1 && i < 2) {
+                        rolls[frame_count][i * 2 + 1] = ' '; /* Add space between rolls */
+                    }
+                }
+                rolls[frame_count][5] = '\0'; /* Properly terminate the string for the last frame */
             }
-            rolls[frame_count][frame->n_rolls * 2 - 1] = '\0'; /* Finalizar cadena correctamente */
-            /* Guardar el acumulado */
+            /* Store the cumulative score */
             scores[frame_count] = frame->score;
         }
         frame_count++;
         current = current->next;
     }
 
-    /* Construcción de la tabla */
-    printf("+-----+-----+-----+-----+-----+-----+-----+-----+-----+-------+\n");
-    printf("|");
+    /* Construct the table */
+    /* Top border line */
+    printf("+-----------------------------------------+\n");
 
-    for (i = 0; i < 9; i++) {
-        printf(" %-3s |", rolls[i]); /* Espacio reservado para 3 caracteres */
-    }
-    printf(" %-5s |\n", rolls[9]); /* Último frame tiene más espacio */
+    /* Rolls line */
     printf("|");
-
-    for (i = 0; i < 9; i++) {
-        if (scores[i] == 0 && strlen(rolls[i]) == 0) {
-            /* Casillas vacías para juegos incompletos */
-            printf("     |");
+    for (i = 0; i < 10; i++) {
+        if (i < 9) {
+            printf("%-3s|", rolls[i]); /* Frames 1 to 9 with 3 characters */
         } else {
-            printf(" %3d |", scores[i]);
+            printf("%-5s|", rolls[i]); /* Last frame with 5 characters */
         }
     }
-    if (scores[9] == 0 && strlen(rolls[9]) == 0) {
-        printf("       |\n"); /* Última casilla vacía */
-    } else {
-        printf(" %5d |\n", scores[9]);
-    }
+    printf("\n");
 
-    printf("+-----+-----+-----+-----+-----+-----+-----+-----+-----+-------+\n");
+    /* Scores line */
+    printf("|");
+    for (i = 0; i < 10; i++) {
+        if (i < 9) {
+            if (scores[i] == 0 && strlen(rolls[i]) == 0) {
+                /* Empty cells for incomplete games */
+                printf("   |");
+            } else {
+                printf("%3d|", scores[i]);
+            }
+        } else {
+            /* Last cell always empty according to the desired format */
+            printf("     |");
+        }
+    }
+    printf("\n");
+
+    /* Bottom border line */
+    printf("+-----------------------------------------+\n");
 }
